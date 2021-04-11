@@ -12,6 +12,9 @@ public:
 	bool Update();
 	void Shutdown();
 
+	HANDLE GetSurfaceHandle() { return sharedSurfaceHandle; }
+	HANDLE GetFenceHandle() { return sharedFenceHandle; }
+
 protected:
 	ComPtr<IDXGIFactory1> factory = nullptr;
 	ComPtr<IDXGISwapChain> swapChain = nullptr;

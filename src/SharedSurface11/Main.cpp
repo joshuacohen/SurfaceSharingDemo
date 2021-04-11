@@ -4,6 +4,7 @@
 
 #include <windows.h>
 #include <D3D11App.h>
+#include <sstream>
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -66,6 +67,27 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	D3D11App app;
 	app.Init(hwnd);
+
+	STARTUPINFO si {0};
+	PROCESS_INFORMATION pi {0};
+
+	std::wstringstream cmdline;
+	cmdline << L"../../SharedSurface12/Debug/SharedSurface12.exe" //<< std::hex
+			<< L' ' << (uint64_t)app.GetSurfaceHandle()
+			<< L' ' << (uint64_t)app.GetFenceHandle();
+
+	bool status = CreateProcess(
+		nullptr,
+		(wchar_t*)cmdline.str().c_str(),
+		nullptr,
+		nullptr,
+		false,
+		0,
+		nullptr,
+		nullptr,
+		&si,
+		&pi
+	);
 
     // Run the message loop.
 
