@@ -1,10 +1,20 @@
 #include <D3D11App.h>
 #include <d3d11_2.h>
 #include <DirectXColors.h>
+#include <comdef.h>
+#include <stdexcept>
 
 inline void ThrowOnError(HRESULT hr) {
 	if (FAILED(hr)) {
-		throw std::exception();
+		throw std::runtime_error(_com_error(hr).ErrorMessage());
+	}
+}
+
+template <class T> 
+void SafeRelease(T **ppT) {
+	if (*ppT) {
+		(*ppT)->Release();
+		*ppT = NULL;
 	}
 }
 
