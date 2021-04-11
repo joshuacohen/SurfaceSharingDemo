@@ -29,7 +29,10 @@ void D3D12App::Init(HANDLE sharedSurfaceHandle, HANDLE sharedFenceHandle) {
 }
 
 bool D3D12App::Update() {
-	return false;
+	commandQueue->Signal(sharedFence.Get(), monotonicCounter);
+
+	commandQueue->Wait(sharedFence.Get(), ++monotonicCounter);
+	return true;
 }
 
 void D3D12App::Shutdown() {

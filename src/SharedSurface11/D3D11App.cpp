@@ -66,6 +66,7 @@ void D3D11App::Init(HWND hwnd) {
 
 	ID3D11Device* device0 = nullptr;
 	IDXGIResource1* sharedResource = nullptr;
+	ID3D11DeviceContext* context0 = nullptr;
 
 	ThrowOnError(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
 
@@ -81,10 +82,11 @@ void D3D11App::Init(HWND hwnd) {
 		&swapChain,
 		&device0,
 		nullptr,
-		&context
+		&context0
 	));
 
 	ThrowOnError(device0->QueryInterface<ID3D11Device5>(&device));
+	ThrowOnError(context0->QueryInterface<ID3D11DeviceContext4>(&context));
 	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget)));
 	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
 	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
@@ -111,7 +113,9 @@ void D3D11App::Init(HWND hwnd) {
 }
 
 bool D3D11App::Update() {
+	context->Wait(sharedFence.Get(), ++monotonicCounter);
 	swapChain->Present(1, 0);
+	context->Signal(sharedFence.Get(), monotonicCounter);
 	return true;
 }
 

@@ -19,7 +19,7 @@ protected:
 	ComPtr<IDXGIFactory1> factory = nullptr;
 	ComPtr<IDXGISwapChain> swapChain = nullptr;
 	ComPtr<ID3D11Device5> device = nullptr;
-	ComPtr<ID3D11DeviceContext> context = nullptr;
+	ComPtr<ID3D11DeviceContext4> context = nullptr;
 	
 	ComPtr<ID3D11Texture2D> renderTarget = nullptr;	
 	ComPtr<ID3D11Texture2D> sharedSurface = nullptr;
@@ -27,4 +27,6 @@ protected:
 
 	HANDLE sharedSurfaceHandle;
 	HANDLE sharedFenceHandle;
+
+	unsigned int monotonicCounter = 0;
 };

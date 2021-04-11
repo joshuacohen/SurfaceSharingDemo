@@ -13,6 +13,9 @@ public:
 
 protected:
 	ComPtr<ID3D12Device> device;
+	ComPtr<ID3D12CommandQueue> commandQueue;
 	ComPtr<ID3D12Resource> sharedSurface;
 	ComPtr<ID3D12Fence> sharedFence;
+
+	unsigned int monotonicCounter = 1;
 };
