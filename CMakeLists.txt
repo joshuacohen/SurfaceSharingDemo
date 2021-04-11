@@ -5,3 +5,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(SharedSurface)
 
 add_subdirectory("src/SharedSurface11")
+add_subdirectory("src/SharedSurface12")
