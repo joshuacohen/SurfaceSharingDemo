@@ -1,5 +1,5 @@
 #include <D3D11App.h>
-#include <d3d11_2.h>
+#include <d3d11_4.h>
 #include <DirectXColors.h>
 #include <comdef.h>
 #include <stdexcept>
@@ -39,37 +39,6 @@ void D3D11App::Init(HWND hwnd) {
 		true
 	};
 
-	D3D_FEATURE_LEVEL features[] = {
-		D3D_FEATURE_LEVEL_9_1,
-		D3D_FEATURE_LEVEL_9_2,
-		D3D_FEATURE_LEVEL_9_3,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_11_1,
-	};
-
-	ThrowOnError(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
-
-	ID3D11Device* device0;
-
-	ThrowOnError(D3D11CreateDeviceAndSwapChain(
-		nullptr,
-		D3D_DRIVER_TYPE_HARDWARE,
-		nullptr,
-		D3D11_CREATE_DEVICE_DEBUG,
-		features,
-		7,
-		D3D11_SDK_VERSION,
-		&scd,
-		&swapChain,
-		&device0,
-		nullptr,
-		&context));
-
-	ThrowOnError(device0->QueryInterface<ID3D11Device2>(&device));
-	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget)));
-
 	D3D11_TEXTURE2D_DESC ss {
 		800,
 		600,
@@ -86,9 +55,39 @@ void D3D11App::Init(HWND hwnd) {
 		D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
 	};
 
-	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
+	D3D_FEATURE_LEVEL features[] = {
+		D3D_FEATURE_LEVEL_9_1,
+		D3D_FEATURE_LEVEL_9_2,
+		D3D_FEATURE_LEVEL_9_3,
+		D3D_FEATURE_LEVEL_10_0,
+		D3D_FEATURE_LEVEL_10_1,
+		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_11_1,
+	};
 
+	ID3D11Device* device0 = nullptr;
 	IDXGIResource1* sharedResource = nullptr;
+
+	ThrowOnError(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
+
+	ThrowOnError(D3D11CreateDeviceAndSwapChain(
+		nullptr,
+		D3D_DRIVER_TYPE_HARDWARE,
+		nullptr,
+		D3D11_CREATE_DEVICE_DEBUG,
+		features,
+		7,
+		D3D11_SDK_VERSION,
+		&scd,
+		&swapChain,
+		&device0,
+		nullptr,
+		&context
+	));
+
+	ThrowOnError(device0->QueryInterface<ID3D11Device5>(&device));
+	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget)));
+	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
 	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
 	ThrowOnError(sharedResource->CreateSharedHandle(
@@ -98,15 +97,32 @@ void D3D11App::Init(HWND hwnd) {
 		&sharedSurfaceHandle
 	));
 
-	//ThrowOnError(device->CreateRenderTargetView(renderTarget, nullptr, &rtv));
+	ThrowOnError(device->CreateFence(
+		0,
+		D3D11_FENCE_FLAG_SHARED,
+		IID_PPV_ARGS(&sharedFence)
+	));
+
+	ThrowOnError(sharedFence->CreateSharedHandle(
+		nullptr, 
+		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
+		L"Shared Fence",
+		&sharedFenceHandle
+	));
 }
 
 bool D3D11App::Update() {
-	context->ClearRenderTargetView(rtv, DirectX::Colors::CornflowerBlue);
 	swapChain->Present(1, 0);
 	return true;
 }
 
 void D3D11App::Shutdown() {
-	
+	SafeRelease(&factory);
+	SafeRelease(&swapChain);
+	SafeRelease(&device);
+	SafeRelease(&context);
+	SafeRelease(&renderTarget);
+
+	SafeRelease(&sharedSurface);
+	SafeRelease(&sharedFence);
 }

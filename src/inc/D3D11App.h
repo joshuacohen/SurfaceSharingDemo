@@ -1,13 +1,13 @@
 #pragma once
-#include <memory>
 #include <windows.h>
 
-struct ID3D11Device2;
+struct ID3D11Device5;
 struct ID3D11DeviceContext;
 struct IDXGIFactory1;
 struct IDXGISwapChain;
 struct ID3D11Texture2D;
 struct ID3D11RenderTargetView;
+struct ID3D11Fence;
 
 class D3D11App {
 public:
@@ -16,15 +16,15 @@ public:
 	void Shutdown();
 
 protected:
-	IDXGIFactory1* factory;
-	IDXGISwapChain* swapChain;
-	ID3D11Device2* device;
-	ID3D11DeviceContext* context;
-	ID3D11Texture2D* renderTarget;
-	ID3D11Texture2D* sharedSurface;
-	ID3D11RenderTargetView* rtv;
+	IDXGIFactory1* factory = nullptr;
+	IDXGISwapChain* swapChain = nullptr;
+	ID3D11Device5* device = nullptr;
+	ID3D11DeviceContext* context = nullptr;
+	
+	ID3D11Texture2D* renderTarget = nullptr;	
+	ID3D11Texture2D* sharedSurface = nullptr;
+	ID3D11Fence* sharedFence = nullptr;
 
 	HANDLE sharedSurfaceHandle;
-private:
-
+	HANDLE sharedFenceHandle;
 };
