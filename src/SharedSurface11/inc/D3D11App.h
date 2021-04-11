@@ -1,13 +1,10 @@
 #pragma once
+#include <d3d11_4.h>
 #include <windows.h>
+#include <wrl.h>
 
-struct ID3D11Device5;
-struct ID3D11DeviceContext;
-struct IDXGIFactory1;
-struct IDXGISwapChain;
-struct ID3D11Texture2D;
-struct ID3D11RenderTargetView;
-struct ID3D11Fence;
+template<class T>
+using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 class D3D11App {
 public:
@@ -16,14 +13,14 @@ public:
 	void Shutdown();
 
 protected:
-	IDXGIFactory1* factory = nullptr;
-	IDXGISwapChain* swapChain = nullptr;
-	ID3D11Device5* device = nullptr;
-	ID3D11DeviceContext* context = nullptr;
+	ComPtr<IDXGIFactory1> factory = nullptr;
+	ComPtr<IDXGISwapChain> swapChain = nullptr;
+	ComPtr<ID3D11Device5> device = nullptr;
+	ComPtr<ID3D11DeviceContext> context = nullptr;
 	
-	ID3D11Texture2D* renderTarget = nullptr;	
-	ID3D11Texture2D* sharedSurface = nullptr;
-	ID3D11Fence* sharedFence = nullptr;
+	ComPtr<ID3D11Texture2D> renderTarget = nullptr;	
+	ComPtr<ID3D11Texture2D> sharedSurface = nullptr;
+	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
 	HANDLE sharedSurfaceHandle;
 	HANDLE sharedFenceHandle;

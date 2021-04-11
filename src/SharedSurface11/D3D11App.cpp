@@ -1,5 +1,4 @@
 #include <D3D11App.h>
-#include <d3d11_4.h>
 #include <DirectXColors.h>
 #include <comdef.h>
 #include <stdexcept>
@@ -117,12 +116,5 @@ bool D3D11App::Update() {
 }
 
 void D3D11App::Shutdown() {
-	SafeRelease(&factory);
-	SafeRelease(&swapChain);
-	SafeRelease(&device);
-	SafeRelease(&context);
-	SafeRelease(&renderTarget);
 
-	SafeRelease(&sharedSurface);
-	SafeRelease(&sharedFence);
 }
