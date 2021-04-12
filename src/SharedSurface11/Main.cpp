@@ -18,8 +18,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-
-            FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
             EndPaint(hwnd, &ps);
         }
         return 0;
@@ -42,7 +40,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     RegisterClass(&wc);
 
     // Create the window.
-
     HWND hwnd = CreateWindowEx(
         0,                     // Optional window styles.
         CLASS_NAME,            // Window class
@@ -65,39 +62,38 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     ShowWindow(hwnd, nCmdShow);
 
-	D3D11App app;
-	app.Init(hwnd);
+    D3D11App app;
+    app.Init(hwnd);
 
-	STARTUPINFO si {0};
-	PROCESS_INFORMATION pi {0};
+    STARTUPINFO si {0};
+    PROCESS_INFORMATION pi {0};
 
-	std::wstringstream cmdline;
-	cmdline << L"../../SharedSurface12/Debug/SharedSurface12.exe" //<< std::hex
-			<< L' ' << (uint64_t)app.GetSurfaceHandle()
-			<< L' ' << (uint64_t)app.GetFenceHandle();
+    std::wstringstream cmdline;
+    cmdline << L"../../SharedSurface12/Debug/SharedSurface12.exe" //<< std::hex
+            << L' ' << (uint64_t)app.GetSurfaceHandle()
+            << L' ' << (uint64_t)app.GetFenceHandle();
 
-	bool status = CreateProcess(
-		nullptr,
-		(wchar_t*)cmdline.str().c_str(),
-		nullptr,
-		nullptr,
-		false,
-		0,
-		nullptr,
-		nullptr,
-		&si,
-		&pi
-	);
+    bool status = CreateProcess(
+        nullptr,
+        (wchar_t*)cmdline.str().c_str(),
+        nullptr,
+        nullptr,
+        false,
+        0,
+        nullptr,
+        nullptr,
+        &si,
+        &pi
+    );
 
     // Run the message loop.
-
     MSG msg = { };
-    while (app.Update(), GetMessage(&msg, NULL, 0, 0))
+    while (app.Update() && GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
 
-	app.Shutdown();
+    app.Shutdown();
     return 0;
 }

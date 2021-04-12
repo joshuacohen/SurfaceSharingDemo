@@ -65,17 +65,17 @@ void D3D12App::Init(HANDLE sharedSurfaceHandle, HANDLE sharedFenceHandle) {
 }
 
 bool D3D12App::Update() {
-	commandQueue->Signal(sharedFence.Get(), monotonicCounter);
+	unsigned long long counter = sharedFence->GetCompletedValue();
+	ThrowOnError(commandQueue->Signal(sharedFence.Get(), 1 + counter));
 
-	// commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
-	// commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue,0, nullptr);
-	// commandList->Close();
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue,0, nullptr);
+	commandList->Close();
 
 	ID3D12CommandList* commandLists[] = {commandList.Get()};
-
+	ThrowOnError(commandQueue->Wait(sharedFence.Get(), 2 + counter));
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
-	commandQueue->Wait(sharedFence.Get(), ++monotonicCounter);
 	return true;
 }
 

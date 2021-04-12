@@ -113,9 +113,12 @@ void D3D11App::Init(HWND hwnd) {
 }
 
 bool D3D11App::Update() {
-	context->Wait(sharedFence.Get(), ++monotonicCounter);
-	swapChain->Present(1, 0);
-	context->Signal(sharedFence.Get(), monotonicCounter);
+	unsigned long long before = sharedFence->GetCompletedValue();
+
+	ThrowOnError(context->Wait(sharedFence.Get(), 1 + before));
+	ThrowOnError(context->Signal(sharedFence.Get(), 2 + before));
+	ThrowOnError(swapChain->Present(1, 0)); //Flushes the queue?
+
 	return true;
 }
 

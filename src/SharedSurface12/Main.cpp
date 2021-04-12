@@ -4,7 +4,6 @@
 
 #include <D3D12App.h>
 #include <string>
-
 #include <debugapi.h>
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -29,7 +28,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-
     // Register the window class.
     const wchar_t CLASS_NAME[]  = L"SharedSurface12";
     
@@ -41,19 +39,40 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     RegisterClass(&wc);
 
-	bool breakOnEntry = true;
+    // Create the window.
+    HWND hwnd = CreateWindowEx(
+        0,                     // Optional window styles.
+        CLASS_NAME,            // Window class
+        L"SharedSurface12",    // Window text
+        WS_OVERLAPPEDWINDOW,   // Window style
 
-	std::wstring cmd = pCmdLine;
-	HANDLE sharedSurface;
-	HANDLE sharedFence;
-	{
-		size_t end = cmd.find(' ');
-		sharedSurface = (HANDLE)wcstoull(cmd.substr(0, end).c_str(), nullptr, 10);
-		sharedFence = (HANDLE)wcstoull(cmd.substr(end, cmd.size()).c_str(), nullptr, 10);
-	}
+        // Size and position
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 
-	D3D12App app;
-	app.Init(sharedSurface, sharedFence);
+        NULL,       // Parent window    
+        NULL,       // Menu
+        hInstance,  // Instance handle
+        NULL        // Additional application data
+        );
+
+    if (hwnd == NULL)
+    {
+        return 0;
+    }
+
+    ShowWindow(hwnd, nCmdShow);
+
+    std::wstring cmd = pCmdLine;
+    HANDLE sharedSurface;
+    HANDLE sharedFence;
+    {
+        size_t end = cmd.find(' ');
+        sharedSurface = (HANDLE)wcstoull(cmd.substr(0, end).c_str(), nullptr, 10);
+        sharedFence = (HANDLE)wcstoull(cmd.substr(end, cmd.size()).c_str(), nullptr, 10);
+    }
+
+    D3D12App app;
+    app.Init(sharedSurface, sharedFence);
 
     // Run the message loop.
     MSG msg = { };
@@ -63,6 +82,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         DispatchMessage(&msg);
     }
 
-	app.Shutdown();
+    app.Shutdown();
     return 0;
 }

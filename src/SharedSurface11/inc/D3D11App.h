@@ -27,6 +27,4 @@ protected:
 
 	HANDLE sharedSurfaceHandle;
 	HANDLE sharedFenceHandle;
-
-	unsigned int monotonicCounter = 0;
 };
