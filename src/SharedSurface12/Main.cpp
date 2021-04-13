@@ -6,6 +6,8 @@
 #include <string>
 #include <debugapi.h>
 
+#define WAIT_FOR_ATTACH while (!IsDebuggerPresent()) { Sleep(100); } __debugbreak()
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
