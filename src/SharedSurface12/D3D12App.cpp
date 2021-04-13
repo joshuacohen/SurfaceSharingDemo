@@ -45,6 +45,7 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 	ThrowOnError(device->CreateDescriptorHeap(&dh_rtv, IID_PPV_ARGS(&rtvHeap)));
 
 	rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+	device->CreateRenderTargetView(sharedSurface.Get(), &rtvd, rtvHandle);
 
 	ThrowOnError(device->CreateCommandList(
 		0,
@@ -54,27 +55,26 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		IID_PPV_ARGS(&commandList)
 	));
 
-	device->CreateRenderTargetView(sharedSurface.Get(), &rtvd, rtvHandle);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue, 0, nullptr);
+	commandList->Close();
 
 	HANDLE h;
 	ThrowOnError(device->OpenSharedHandleByName(surfaceGuidStr.c_str(), GENERIC_ALL, &h));
 	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedSurface)));
 
 	ThrowOnError(device->OpenSharedHandleByName(fenceGuidStr.c_str(), GENERIC_ALL, &h));
-	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));
+	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));	
 }
 
 bool D3D12App::Update() {
 	unsigned long long counter = sharedFence->GetCompletedValue();
-	ThrowOnError(commandQueue->Signal(sharedFence.Get(), 1 + counter));
-
-	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
-	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue,0, nullptr);
-	commandList->Close();
 
 	ID3D12CommandList* commandLists[] = {commandList.Get()};
-	ThrowOnError(commandQueue->Wait(sharedFence.Get(), 2 + counter));
 	commandQueue->ExecuteCommandLists(1, commandLists);
+
+	ThrowOnError(commandQueue->Signal(sharedFence.Get(), 1 + counter));
+	ThrowOnError(commandQueue->Wait(sharedFence.Get(), 2 + counter));
 
 	return true;
 }
