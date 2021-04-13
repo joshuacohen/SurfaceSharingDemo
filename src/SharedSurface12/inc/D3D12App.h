@@ -22,4 +22,5 @@ protected:
 	ComPtr<ID3D12Fence> sharedFence;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
+	HANDLE cpuFenceEvent;
 };

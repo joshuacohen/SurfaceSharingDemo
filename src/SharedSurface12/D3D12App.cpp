@@ -64,7 +64,9 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedSurface)));
 
 	ThrowOnError(device->OpenSharedHandleByName(fenceGuidStr.c_str(), GENERIC_ALL, &h));
-	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));	
+	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));
+
+	cpuFenceEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
 }
 
 bool D3D12App::Update() {
@@ -75,6 +77,9 @@ bool D3D12App::Update() {
 
 	ThrowOnError(commandQueue->Signal(sharedFence.Get(), 1 + counter));
 	ThrowOnError(commandQueue->Wait(sharedFence.Get(), 2 + counter));
+
+	ThrowOnError(sharedFence->SetEventOnCompletion(2 + counter, cpuFenceEvent));
+	WaitForSingleObject(cpuFenceEvent, INFINITE);
 
 	return true;
 }
