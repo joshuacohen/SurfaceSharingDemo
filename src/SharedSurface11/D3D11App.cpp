@@ -24,8 +24,10 @@ void D3D11App::Init(HWND hwnd) {
 		DXGI_MODE_DESC {
 			800,
 			600,
-			0,
-			1,
+			DXGI_RATIONAL {
+				60,
+				1
+			},
 			DXGI_FORMAT_B8G8R8A8_UNORM,
 			DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
 			DXGI_MODE_SCALING_UNSPECIFIED
@@ -53,7 +55,7 @@ void D3D11App::Init(HWND hwnd) {
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET,
 		0,
-		D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
+		D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
 	};
 
 	D3D_FEATURE_LEVEL features[] = {
@@ -64,6 +66,12 @@ void D3D11App::Init(HWND hwnd) {
 		D3D_FEATURE_LEVEL_10_1,
 		D3D_FEATURE_LEVEL_11_0,
 		D3D_FEATURE_LEVEL_11_1,
+	};
+
+	D3D11_RENDER_TARGET_VIEW_DESC rtvdesc {
+		DXGI_FORMAT_B8G8R8A8_UNORM,
+		D3D11_RTV_DIMENSION_TEXTURE2D,
+		0
 	};
 
 	ID3D11Device* device0 = nullptr;
@@ -89,8 +97,9 @@ void D3D11App::Init(HWND hwnd) {
 
 	ThrowOnError(device0->QueryInterface<ID3D11Device5>(&device));
 	ThrowOnError(context0->QueryInterface<ID3D11DeviceContext4>(&context));
-	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&renderTarget)));
+	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
 	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
+	ThrowOnError(device->CreateRenderTargetView(sharedSurface.Get(), nullptr, &rtv));
 	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
 	ThrowOnError(device->CreateFence(

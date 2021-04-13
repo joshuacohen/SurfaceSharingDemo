@@ -21,8 +21,9 @@ protected:
 	ComPtr<ID3D11Device5> device = nullptr;
 	ComPtr<ID3D11DeviceContext4> context = nullptr;
 	
-	ComPtr<ID3D11Texture2D> renderTarget = nullptr;	
+	ComPtr<ID3D11Texture2D> backBuffer = nullptr;	
 	ComPtr<ID3D11Texture2D> sharedSurface = nullptr;
+	ComPtr<ID3D11RenderTargetView> rtv = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
 	wchar_t surfaceGuidStr[39];
