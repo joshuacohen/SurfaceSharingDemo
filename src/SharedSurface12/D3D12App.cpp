@@ -18,7 +18,7 @@ void SafeRelease(T **ppT) {
 	}
 }
 
-void D3D12App::Init(HANDLE sharedSurfaceHandle, HANDLE sharedFenceHandle) {
+void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 	D3D12_COMMAND_QUEUE_DESC cq {
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
@@ -57,10 +57,10 @@ void D3D12App::Init(HANDLE sharedSurfaceHandle, HANDLE sharedFenceHandle) {
 	device->CreateRenderTargetView(sharedSurface.Get(), &rtvd, rtvHandle);
 
 	HANDLE h;
-	ThrowOnError(device->OpenSharedHandleByName(L"Shared Surface", GENERIC_ALL, &h));
+	ThrowOnError(device->OpenSharedHandleByName(surfaceGuidStr.c_str(), GENERIC_ALL, &h));
 	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedSurface)));
 
-	ThrowOnError(device->OpenSharedHandleByName(L"Shared Fence", GENERIC_ALL, &h));
+	ThrowOnError(device->OpenSharedHandleByName(fenceGuidStr.c_str(), GENERIC_ALL, &h));
 	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));
 }
 

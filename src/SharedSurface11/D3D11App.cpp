@@ -3,6 +3,8 @@
 #include <comdef.h>
 #include <stdexcept>
 
+#include <string>
+
 inline void ThrowOnError(HRESULT hr) {
 	if (FAILED(hr)) {
 		throw std::runtime_error(_com_error(hr).ErrorMessage());
@@ -91,24 +93,33 @@ void D3D11App::Init(HWND hwnd) {
 	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
 	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
-	ThrowOnError(sharedResource->CreateSharedHandle(
-		nullptr, 
-		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		L"Shared Surface",
-		&sharedSurfaceHandle
-	));
-
 	ThrowOnError(device->CreateFence(
 		0,
 		D3D11_FENCE_FLAG_SHARED,
 		IID_PPV_ARGS(&sharedFence)
 	));
 
+	GUID surfaceGuid, fenceGuid;
+	HANDLE surfaceHandle, fenceHandle;
+
+	CoCreateGuid(&surfaceGuid);
+	CoCreateGuid(&fenceGuid);
+
+	StringFromGUID2(surfaceGuid, surfaceGuidStr, sizeof(surfaceGuidStr));
+	StringFromGUID2(fenceGuid, fenceGuidStr, sizeof(fenceGuidStr));
+
+	ThrowOnError(sharedResource->CreateSharedHandle(
+		nullptr, 
+		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
+		surfaceGuidStr,
+		&surfaceHandle
+	));
+
 	ThrowOnError(sharedFence->CreateSharedHandle(
 		nullptr, 
 		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		L"Shared Fence",
-		&sharedFenceHandle
+		fenceGuidStr,
+		&fenceHandle
 	));
 }
 

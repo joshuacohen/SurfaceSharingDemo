@@ -1,13 +1,14 @@
 #include <d3d12.h>
 #include <windows.h>
 #include <wrl.h>
+#include <string>
 
 template<class T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 class D3D12App {
 public:
-	void Init(HANDLE sharedSurface, HANDLE sharedFence);
+	void Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr);
 	bool Update();
 	void Shutdown();
 

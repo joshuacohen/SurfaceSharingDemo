@@ -12,8 +12,8 @@ public:
 	bool Update();
 	void Shutdown();
 
-	HANDLE GetSurfaceHandle() { return sharedSurfaceHandle; }
-	HANDLE GetFenceHandle() { return sharedFenceHandle; }
+	const wchar_t* GetSurface() { return surfaceGuidStr; }
+	const wchar_t* GetFence() { return fenceGuidStr; }
 
 protected:
 	ComPtr<IDXGIFactory1> factory = nullptr;
@@ -25,6 +25,6 @@ protected:
 	ComPtr<ID3D11Texture2D> sharedSurface = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
-	HANDLE sharedSurfaceHandle;
-	HANDLE sharedFenceHandle;
+	wchar_t surfaceGuidStr[39];
+	wchar_t fenceGuidStr[39];
 };

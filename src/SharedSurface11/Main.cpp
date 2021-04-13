@@ -70,8 +70,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     std::wstringstream cmdline;
     cmdline << L"../../SharedSurface12/Debug/SharedSurface12.exe" //<< std::hex
-            << L' ' << (uint64_t)app.GetSurfaceHandle()
-            << L' ' << (uint64_t)app.GetFenceHandle();
+            << L' ' << app.GetSurface()
+            << L' ' << app.GetFence();
 
     bool status = CreateProcess(
         nullptr,

@@ -63,16 +63,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ShowWindow(hwnd, nCmdShow);
 
     std::wstring cmd = pCmdLine;
-    HANDLE sharedSurface;
-    HANDLE sharedFence;
+    std::wstring surfaceGuidStr, fenceGuidStr;
     {
         size_t end = cmd.find(' ');
-        sharedSurface = (HANDLE)wcstoull(cmd.substr(0, end).c_str(), nullptr, 10);
-        sharedFence = (HANDLE)wcstoull(cmd.substr(end, cmd.size()).c_str(), nullptr, 10);
+        surfaceGuidStr = cmd.substr(0, end);
+        fenceGuidStr = cmd.substr(end + 1, cmd.size());
     }
 
     D3D12App app;
-    app.Init(sharedSurface, sharedFence);
+    app.Init(surfaceGuidStr, fenceGuidStr);
 
     // Run the message loop.
     MSG msg = { };
