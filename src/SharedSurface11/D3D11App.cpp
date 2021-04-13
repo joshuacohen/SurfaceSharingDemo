@@ -136,8 +136,12 @@ bool D3D11App::Update() {
 	unsigned long long before = sharedFence->GetCompletedValue();
 
 	ThrowOnError(context->Wait(sharedFence.Get(), 1 + before));
+
+	context->ClearRenderTargetView(rtv.Get(), DirectX::Colors::CornflowerBlue);
+	context->CopyResource(backBuffer.Get(), sharedSurface.Get());
+	ThrowOnError(swapChain->Present(0, 0)); //Flushes the queue?
+	
 	ThrowOnError(context->Signal(sharedFence.Get(), 2 + before));
-	ThrowOnError(swapChain->Present(1, 0)); //Flushes the queue?
 
 	return true;
 }
