@@ -42,7 +42,7 @@ void D3D11App::Init(HWND hwnd) {
 		true
 	};
 
-	D3D11_TEXTURE2D_DESC ss {
+	D3D11_TEXTURE2D_DESC sharedRenderTargetDesc {
 		800,
 		600,
 		1,
@@ -98,9 +98,9 @@ void D3D11App::Init(HWND hwnd) {
 	ThrowOnError(device0->QueryInterface<ID3D11Device5>(&device));
 	ThrowOnError(context0->QueryInterface<ID3D11DeviceContext4>(&context));
 	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-	ThrowOnError(device->CreateTexture2D(&ss, nullptr, &sharedSurface));
-	ThrowOnError(device->CreateRenderTargetView(sharedSurface.Get(), nullptr, &rtv));
-	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
+	ThrowOnError(device->CreateTexture2D(&sharedRenderTargetDesc, nullptr, &sharedRenderTarget));
+	ThrowOnError(device->CreateRenderTargetView(sharedRenderTarget.Get(), nullptr, &rtv));
+	ThrowOnError(sharedRenderTarget->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
 	ThrowOnError(device->CreateFence(
 		0,
@@ -114,13 +114,13 @@ void D3D11App::Init(HWND hwnd) {
 	CoCreateGuid(&surfaceGuid);
 	CoCreateGuid(&fenceGuid);
 
-	StringFromGUID2(surfaceGuid, surfaceGuidStr, sizeof(surfaceGuidStr));
+	StringFromGUID2(surfaceGuid, renderTargetGuidStr, sizeof(renderTargetGuidStr));
 	StringFromGUID2(fenceGuid, fenceGuidStr, sizeof(fenceGuidStr));
 
 	ThrowOnError(sharedResource->CreateSharedHandle(
 		nullptr, 
 		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		surfaceGuidStr,
+		renderTargetGuidStr,
 		&surfaceHandle
 	));
 
@@ -138,7 +138,7 @@ bool D3D11App::Update() {
 	ThrowOnError(context->Wait(sharedFence.Get(), 1 + before));
 
 	context->ClearRenderTargetView(rtv.Get(), DirectX::Colors::CornflowerBlue);
-	context->CopyResource(backBuffer.Get(), sharedSurface.Get());
+	context->CopyResource(backBuffer.Get(), sharedRenderTarget.Get());
 	ThrowOnError(swapChain->Present(0, 0)); //Flushes the queue?
 	
 	ThrowOnError(context->Signal(sharedFence.Get(), 2 + before));

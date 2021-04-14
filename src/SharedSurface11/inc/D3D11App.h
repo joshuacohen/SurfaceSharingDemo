@@ -12,7 +12,7 @@ public:
 	bool Update();
 	void Shutdown();
 
-	const wchar_t* GetSurface() { return surfaceGuidStr; }
+	const wchar_t* GetSurface() { return renderTargetGuidStr; }
 	const wchar_t* GetFence() { return fenceGuidStr; }
 
 protected:
@@ -26,6 +26,6 @@ protected:
 	ComPtr<ID3D11RenderTargetView> rtv = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
-	wchar_t surfaceGuidStr[39];
+	wchar_t renderTargetGuidStr[39];
 	wchar_t fenceGuidStr[39];
 };
