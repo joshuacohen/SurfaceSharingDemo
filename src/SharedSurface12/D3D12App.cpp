@@ -35,7 +35,7 @@ void D3D12App::InitRenderer() {
 	};
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc {
-		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
+		D3D12_DESCRIPTOR_HEAP_TYPE_DSV,
 		1,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		0
@@ -122,6 +122,9 @@ void D3D12App::InitTextures(std::wstring surfaceGuidStr, std::wstring fenceGuidS
 
 	rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
 	device->CreateRenderTargetView(sharedSurface.Get(), &rtvDesc, rtvHandle);
+
+	dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	device->CreateDepthStencilView(depthBuffer.Get(), &dsvDesc, dsvHandle);
 }
 
 void D3D12App::InitPipeline() {
@@ -141,7 +144,6 @@ void D3D12App::InitPipeline() {
 }
 
 void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
-
 	InitRenderer();
 	InitShaders();
 	InitBuffers();
