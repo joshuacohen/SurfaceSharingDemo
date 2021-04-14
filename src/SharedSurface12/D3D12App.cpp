@@ -126,6 +126,18 @@ void D3D12App::InitTextures(std::wstring surfaceGuidStr, std::wstring fenceGuidS
 
 void D3D12App::InitPipeline() {
 	// We are going to serialize an empty root signature 
+	D3D12_ROOT_SIGNATURE_DESC rsd {
+		0,
+		nullptr,
+		0,
+		nullptr,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+	};
+
+	ComPtr<ID3DBlob> sig, err;
+	ThrowOnError(D3D12SerializeRootSignature(&rsd, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &err));
+	ThrowOnError(device->CreateRootSignature(0, sig->GetBufferPointer(), sig->GetBufferSize(), IID_PPV_ARGS(&rootSig)));
+
 }
 
 void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {

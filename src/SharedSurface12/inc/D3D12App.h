@@ -31,6 +31,7 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle;
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 
+	ComPtr<ID3D12RootSignature> rootSig;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	HANDLE cpuFenceEvent;
 };
