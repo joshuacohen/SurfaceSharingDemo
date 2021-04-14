@@ -19,30 +19,37 @@ void SafeRelease(T **ppT) {
 }
 
 void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
-	D3D12_COMMAND_QUEUE_DESC cq {
+	D3D12_COMMAND_QUEUE_DESC commandQueueDesc {
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
 		D3D12_COMMAND_QUEUE_FLAG_NONE,
 		0
 	};
 
-	D3D12_DESCRIPTOR_HEAP_DESC dh_rtv {
+	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc {
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		1,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		0
 	};
 
-	D3D12_DESCRIPTOR_HEAP_DESC dh_dsv {
+	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc {
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV,
 		1,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE,
 		0
 	};
 
-	D3D12_RENDER_TARGET_VIEW_DESC rtvd {
+	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc {
 		DXGI_FORMAT_B8G8R8A8_UNORM,
 		D3D12_RTV_DIMENSION_TEXTURE2D,
+		0
+	};
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc {
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
+		D3D12_DSV_DIMENSION_TEXTURE2D,
+		D3D12_DSV_FLAG_READ_ONLY_STENCIL,
 		0
 	};
 
@@ -81,10 +88,10 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 	debugLayer->EnableDebugLayer();
 
 	ThrowOnError(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)));
-	ThrowOnError(device->CreateCommandQueue(&cq, IID_PPV_ARGS(&commandQueue)));
+	ThrowOnError(device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue)));
 	ThrowOnError(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
-	ThrowOnError(device->CreateDescriptorHeap(&dh_rtv, IID_PPV_ARGS(&rtvHeap)));
-	ThrowOnError(device->CreateDescriptorHeap(&dh_dsv, IID_PPV_ARGS(&dsvHeap)));
+	ThrowOnError(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
+	ThrowOnError(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
 
 	ThrowOnError(device->CreateCommandList(
 		0,
@@ -96,8 +103,9 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 
 
 	rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-	device->CreateRenderTargetView(sharedSurface.Get(), &rtvd, rtvHandle);
+	device->CreateRenderTargetView(sharedSurface.Get(), &rtvDesc, rtvHandle);
 	dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
+	device->CreateDepthStencilView(depthBuffer.Get(), &dsvDesc, dsvHandle);
 
 	ThrowOnError(device->CreateCommittedResource(
 		&implicitHeapProperties,
@@ -108,7 +116,7 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		IID_PPV_ARGS(&depthBuffer)
 	));
 
-	commandList->OMSetRenderTargets(1, &rtvHandle, true, nullptr);
+	commandList->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
 	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue, 0, nullptr);
 	commandList->Close();
 
