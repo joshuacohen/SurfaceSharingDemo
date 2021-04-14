@@ -18,7 +18,8 @@ void SafeRelease(T **ppT) {
 	}
 }
 
-void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
+void D3D12App::InitRenderer() {
+
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc {
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		D3D12_COMMAND_QUEUE_PRIORITY_NORMAL,
@@ -40,6 +41,26 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		0
 	};
 
+	ComPtr<ID3D12Debug> debugLayer;
+	ThrowOnError(D3D12GetDebugInterface(IID_PPV_ARGS(&debugLayer)));
+	debugLayer->EnableDebugLayer();
+
+	ThrowOnError(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)));
+	ThrowOnError(device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue)));
+	ThrowOnError(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
+	ThrowOnError(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
+	ThrowOnError(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
+}
+
+void D3D12App::InitShaders() {
+
+}
+
+void D3D12App::InitBuffers() {
+
+}
+
+void D3D12App::InitTextures(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc {
 		DXGI_FORMAT_B8G8R8A8_UNORM,
 		D3D12_RTV_DIMENSION_TEXTURE2D,
@@ -83,29 +104,12 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		0
 	};
 
-	ComPtr<ID3D12Debug> debugLayer;
-	ThrowOnError(D3D12GetDebugInterface(IID_PPV_ARGS(&debugLayer)));
-	debugLayer->EnableDebugLayer();
+	HANDLE h;
+	ThrowOnError(device->OpenSharedHandleByName(surfaceGuidStr.c_str(), GENERIC_ALL, &h));
+	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedSurface)));
 
-	ThrowOnError(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&device)));
-	ThrowOnError(device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&commandQueue)));
-	ThrowOnError(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator)));
-	ThrowOnError(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvHeap)));
-	ThrowOnError(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&dsvHeap)));
-
-	ThrowOnError(device->CreateCommandList(
-		0,
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		commandAllocator.Get(),
-		nullptr,
-		IID_PPV_ARGS(&commandList)
-	));
-
-
-	rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-	device->CreateRenderTargetView(sharedSurface.Get(), &rtvDesc, rtvHandle);
-	dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
-	device->CreateDepthStencilView(depthBuffer.Get(), &dsvDesc, dsvHandle);
+	ThrowOnError(device->OpenSharedHandleByName(fenceGuidStr.c_str(), GENERIC_ALL, &h));
+	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));
 
 	ThrowOnError(device->CreateCommittedResource(
 		&implicitHeapProperties,
@@ -116,16 +120,33 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		IID_PPV_ARGS(&depthBuffer)
 	));
 
+	rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
+	device->CreateRenderTargetView(sharedSurface.Get(), &rtvDesc, rtvHandle);
+}
+
+void D3D12App::InitPipeline() {
+	// We are going to serialize an empty root signature 
+}
+
+void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
+
+	InitRenderer();
+	InitShaders();
+	InitBuffers();
+	InitTextures(surfaceGuidStr, fenceGuidStr);
+	InitPipeline();
+
+	ThrowOnError(device->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		commandAllocator.Get(),
+		nullptr,
+		IID_PPV_ARGS(&commandList)
+	));
+
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
 	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue, 0, nullptr);
 	commandList->Close();
-
-	HANDLE h;
-	ThrowOnError(device->OpenSharedHandleByName(surfaceGuidStr.c_str(), GENERIC_ALL, &h));
-	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedSurface)));
-
-	ThrowOnError(device->OpenSharedHandleByName(fenceGuidStr.c_str(), GENERIC_ALL, &h));
-	ThrowOnError(device->OpenSharedHandle(h, IID_PPV_ARGS(&sharedFence)));
 
 	cpuFenceEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
 }
