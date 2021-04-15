@@ -28,6 +28,9 @@ protected:
 	ComPtr<ID3DBlob> vertexShader;
 	ComPtr<ID3DBlob> pixelShader;
 
+	ComPtr<ID3D12Resource> vertBuffer;
+	D3D12_VERTEX_BUFFER_VIEW vertBufferView;
+
 	ComPtr<ID3D12Resource> sharedSurface;
 	ComPtr<ID3D12Resource> depthBuffer;
 	ComPtr<ID3D12Fence> sharedFence;

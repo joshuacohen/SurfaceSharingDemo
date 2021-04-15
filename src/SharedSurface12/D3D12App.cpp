@@ -19,6 +19,11 @@ void SafeRelease(T **ppT) {
 	}
 }
 
+struct Vertex {
+	float pos[3];
+	float col[4];
+};
+
 void D3D12App::InitRenderer() {
 
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc {
@@ -65,7 +70,54 @@ void D3D12App::InitShaders() {
 }
 
 void D3D12App::InitBuffers() {
+	Vertex verts[] = {
+		{{0.0f, 0.25f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+		{{0.25f, -0.25f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+		{{-0.25f, -0.25f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}
+	};
 
+	D3D12_HEAP_PROPERTIES implicitHeapProperties {
+		D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+		D3D12_MEMORY_POOL_UNKNOWN,
+		0,
+		0
+	};
+
+	size_t vertsSize = sizeof(verts);
+
+	D3D12_RESOURCE_DESC vertBufferDesc {
+		D3D12_RESOURCE_DIMENSION_BUFFER,
+		0,
+		sizeof(verts),
+		1,
+		1,
+		1,
+		DXGI_FORMAT_UNKNOWN,
+		DXGI_SAMPLE_DESC { 1, 0 },
+		D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+		D3D12_RESOURCE_FLAG_NONE
+	};
+
+	ThrowOnError(device->CreateCommittedResource(
+		&implicitHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&vertBufferDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertBuffer)
+	));
+
+	void* mappedData = nullptr;
+	ThrowOnError(vertBuffer->Map(0, nullptr, &mappedData));
+	memcpy(mappedData, verts, sizeof(verts));
+	vertBuffer->Unmap(0, nullptr);
+
+	vertBufferView = D3D12_VERTEX_BUFFER_VIEW {
+		vertBuffer->GetGPUVirtualAddress(),
+		sizeof(Vertex),
+		sizeof(verts)
+	};
 }
 
 void D3D12App::InitTextures(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
@@ -149,6 +201,11 @@ void D3D12App::InitPipeline() {
 	ThrowOnError(D3D12SerializeRootSignature(&rsd, D3D_ROOT_SIGNATURE_VERSION_1, &sig, &err));
 	ThrowOnError(device->CreateRootSignature(0, sig->GetBufferPointer(), sig->GetBufferSize(), IID_PPV_ARGS(&rootSig)));
 
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+	};
 }
 
 void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
@@ -166,6 +223,7 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		IID_PPV_ARGS(&commandList)
 	));
 
+	commandList->IASetVertexBuffers(0, 1, &vertBufferView);
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
 	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue, 0, nullptr);
 	commandList->Close();
