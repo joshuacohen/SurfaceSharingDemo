@@ -1,5 +1,6 @@
 #include <D3D12App.h>
 
+#include <d3dcompiler.h>
 #include <stdexcept>
 #include <comdef.h>
 #include <DirectXColors.h>
@@ -53,7 +54,14 @@ void D3D12App::InitRenderer() {
 }
 
 void D3D12App::InitShaders() {
+	unsigned int flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+  
+	wchar_t path[MAX_PATH];
+	_wfullpath(path, L"../../SharedSurface12/shaders/HelloTriangle.hlsl", MAX_PATH);
 
+	ComPtr<ID3DBlob> err;
+	ThrowOnError(D3DCompileFromFile(path, nullptr, nullptr, "VSMain", "vs_5_0", flags, 0, &vertexShader, &err));
+	ThrowOnError(D3DCompileFromFile(path, nullptr, nullptr, "PSMain", "ps_5_0", flags, 0, &pixelShader, &err));
 }
 
 void D3D12App::InitBuffers() {

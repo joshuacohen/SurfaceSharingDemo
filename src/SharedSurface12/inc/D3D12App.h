@@ -25,6 +25,9 @@ protected:
 	ComPtr<ID3D12DescriptorHeap> rtvHeap;
 	ComPtr<ID3D12DescriptorHeap> dsvHeap;
 
+	ComPtr<ID3DBlob> vertexShader;
+	ComPtr<ID3DBlob> pixelShader;
+
 	ComPtr<ID3D12Resource> sharedSurface;
 	ComPtr<ID3D12Resource> depthBuffer;
 	ComPtr<ID3D12Fence> sharedFence;
