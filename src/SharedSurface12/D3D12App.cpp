@@ -206,6 +206,25 @@ void D3D12App::InitPipeline() {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 	};
+
+	D3D12_SHADER_BYTECODE {0};
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc {0};
+
+	DXGI_FORMAT formatArray[8] = {DXGI_FORMAT_B8G8R8A8_UNORM};
+
+	psoDesc.pRootSignature =  rootSig.Get();
+	psoDesc.VS = {vertexShader->GetBufferPointer(), vertexShader->GetBufferSize()};
+	psoDesc.PS = {pixelShader->GetBufferPointer(), pixelShader->GetBufferSize()};
+	psoDesc.InputLayout = {inputElementDescs, 2};
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.SampleDesc.Count = 1;
+	psoDesc.SampleDesc.Quality = 0;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_B8G8R8A8_UNORM;
+
+	ThrowOnError(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
 }
 
 void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
@@ -219,7 +238,7 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		commandAllocator.Get(),
-		nullptr,
+		pipelineState.Get(),
 		IID_PPV_ARGS(&commandList)
 	));
 
