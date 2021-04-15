@@ -18,6 +18,7 @@ protected:
 	void InitBuffers();
 	void InitTextures(std::wstring surfaceGuidStr, std::wstring fenceGuidStr);
 	void InitPipeline();
+	void InitCommandList();
 
 	ComPtr<ID3D12Device> device;
 	ComPtr<ID3D12CommandQueue> commandQueue;

@@ -227,13 +227,7 @@ void D3D12App::InitPipeline() {
 	ThrowOnError(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState)));
 }
 
-void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
-	InitRenderer();
-	InitShaders();
-	InitBuffers();
-	InitTextures(surfaceGuidStr, fenceGuidStr);
-	InitPipeline();
-
+void D3D12App::InitCommandList() {
 	ThrowOnError(device->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -242,10 +236,37 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 		IID_PPV_ARGS(&commandList)
 	));
 
+	D3D12_VIEWPORT vp {
+		0.0f,
+		0.0f,
+		800,
+		600
+	};
+
+	D3D12_RECT sr {
+		0,
+		0,
+		800,
+		600
+	};
+
+	commandList->SetGraphicsRootSignature(rootSig.Get());
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vertBufferView);
 	commandList->OMSetRenderTargets(1, &rtvHandle, true, &dsvHandle);
+	commandList->RSSetViewports(1, &vp);
+	commandList->RSSetScissorRects(1, &sr);
 	commandList->ClearRenderTargetView(rtvHandle, DirectX::Colors::CornflowerBlue, 0, nullptr);
 	commandList->Close();
+}
+
+void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
+	InitRenderer();
+	InitShaders();
+	InitBuffers();
+	InitTextures(surfaceGuidStr, fenceGuidStr);
+	InitPipeline();
+	InitCommandList();
 
 	cpuFenceEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
 }
