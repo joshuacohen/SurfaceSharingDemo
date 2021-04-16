@@ -88,10 +88,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     // Run the message loop.
     MSG msg = { };
-    while (app.Update() && GetMessage(&msg, NULL, 0, 0))
+    while (app.Update())
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     app.Shutdown();

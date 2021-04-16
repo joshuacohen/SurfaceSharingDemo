@@ -51,7 +51,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         // Size and position
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 
-        NULL,       // Parent window    
+        NULL,       // Parent window
         NULL,       // Menu
         hInstance,  // Instance handle
         NULL        // Additional application data
@@ -61,8 +61,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     {
         return 0;
     }
-
-    ShowWindow(hwnd, nCmdShow);
 
     std::wstring cmd = pCmdLine;
     std::wstring surfaceGuidStr, fenceGuidStr;
@@ -77,10 +75,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     // Run the message loop.
     MSG msg = { };
-    while (app.Update() && GetMessage(&msg, NULL, 0, 0))
+    while (app.Update())
     {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     app.Shutdown();
