@@ -42,4 +42,6 @@ protected:
 	ComPtr<ID3D12RootSignature> rootSig;
 	ComPtr<ID3D12GraphicsCommandList> commandList;
 	HANDLE cpuFenceEvent;
+
+	unsigned int monotonicCounter = 0;
 };

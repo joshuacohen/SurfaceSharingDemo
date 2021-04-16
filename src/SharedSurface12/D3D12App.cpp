@@ -272,15 +272,13 @@ void D3D12App::Init(std::wstring surfaceGuidStr, std::wstring fenceGuidStr) {
 }
 
 bool D3D12App::Update() {
-	unsigned long long counter = sharedFence->GetCompletedValue();
-
 	ID3D12CommandList* commandLists[] = {commandList.Get()};
 	commandQueue->ExecuteCommandLists(1, commandLists);
 
-	ThrowOnError(commandQueue->Signal(sharedFence.Get(), 1 + counter));
-	ThrowOnError(commandQueue->Wait(sharedFence.Get(), 2 + counter));
+	ThrowOnError(commandQueue->Signal(sharedFence.Get(), ++monotonicCounter));
+	ThrowOnError(commandQueue->Wait(sharedFence.Get(), ++monotonicCounter));
 
-	ThrowOnError(sharedFence->SetEventOnCompletion(2 + counter, cpuFenceEvent));
+	ThrowOnError(sharedFence->SetEventOnCompletion(monotonicCounter, cpuFenceEvent));
 	WaitForSingleObject(cpuFenceEvent, INFINITE);
 
 	return true;

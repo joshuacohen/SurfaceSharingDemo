@@ -28,4 +28,6 @@ protected:
 
 	wchar_t renderTargetGuidStr[39];
 	wchar_t fenceGuidStr[39];
+
+	unsigned int monotonicCounter = 0;
 };
