@@ -65,6 +65,11 @@ private:
     ComPtr<ID3D12Fence> m_fence;
     UINT64 m_fenceValue;
 
+	//Shared resources
+	ComPtr<ID3D12Resource> m_sharedRenderTarget;
+	ComPtr<ID3D12Resource> m_sharedDepthBuffer;
+	ComPtr<ID3D12Fence> m_sharedFence;
+
     void LoadPipeline();
     void LoadAssets();
     void PopulateCommandList();

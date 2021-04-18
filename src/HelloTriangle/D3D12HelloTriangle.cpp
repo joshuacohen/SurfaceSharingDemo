@@ -118,6 +118,14 @@ void D3D12HelloTriangle::LoadPipeline()
         m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
 
+	HANDLE tempHandle;
+
+	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedRenderTargetGuid.c_str(), GENERIC_ALL, &tempHandle));
+	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedRenderTarget)));
+
+	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedFenceGuid.c_str(), GENERIC_ALL, &tempHandle));
+	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedFence)));
+
     // Create frame resources.
     {
         CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
