@@ -129,17 +129,19 @@ void D3D12HelloTriangle::LoadPipeline()
     // Create frame resources.
     {
         CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+		m_device->CreateRenderTargetView(m_sharedRenderTarget.Get(), nullptr, rtvHandle);
 
         // Create a RTV for each frame.
-        for (UINT n = 0; n < FrameCount; n++)
-        {
-            ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n])));
-            m_device->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
-            rtvHandle.Offset(1, m_rtvDescriptorSize);
-        }
+        // for (UINT n = 0; n < FrameCount; n++)
+        // {
+        //     ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n])));
+        //     rtvHandle.Offset(1, m_rtvDescriptorSize);
+		// }
     }
 
     ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
+
+	m_cpuWaitEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
 }
 
 // Load the sample assets.
@@ -191,7 +193,7 @@ void D3D12HelloTriangle::LoadAssets()
         psoDesc.SampleMask = UINT_MAX;
         psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         psoDesc.NumRenderTargets = 1;
-        psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+        psoDesc.RTVFormats[0] = DXGI_FORMAT_B8G8R8A8_UNORM;
         psoDesc.SampleDesc.Count = 1;
         ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
     }
@@ -274,8 +276,12 @@ void D3D12HelloTriangle::OnRender()
     ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
+	ThrowIfFailed(m_sharedFence->Signal(++monotonicCounter));
+	ThrowIfFailed(m_commandQueue->Wait(m_sharedFence.Get(), ++monotonicCounter));
+	ThrowIfFailed(m_sharedFence->SetEventOnCompletion(monotonicCounter, m_cpuWaitEvent));
     // Present the frame.
     ThrowIfFailed(m_swapChain->Present(1, 0));
+	WaitForSingleObject(m_cpuWaitEvent, INFINITE);
 
     WaitForPreviousFrame();
 }
@@ -309,7 +315,7 @@ void D3D12HelloTriangle::PopulateCommandList()
     // Indicate that the back buffer will be used as a render target.
     m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
     m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
     // Record commands.

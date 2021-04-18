@@ -35,6 +35,8 @@ public:
 private:
     static const UINT FrameCount = 2;
 
+	unsigned int monotonicCounter = 0;
+
     struct Vertex
     {
         XMFLOAT3 position;
@@ -69,6 +71,7 @@ private:
 	ComPtr<ID3D12Resource> m_sharedRenderTarget;
 	ComPtr<ID3D12Resource> m_sharedDepthBuffer;
 	ComPtr<ID3D12Fence> m_sharedFence;
+	HANDLE m_cpuWaitEvent;
 
     void LoadPipeline();
     void LoadAssets();
