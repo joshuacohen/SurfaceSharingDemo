@@ -25,6 +25,8 @@ void D3D12HelloTriangle::OnInit()
 {
     LoadPipeline();
     LoadAssets();
+
+    PopulateCommandList();
 }
 
 // Load the rendering pipeline dependencies.
@@ -269,9 +271,6 @@ void D3D12HelloTriangle::OnUpdate()
 // Render the scene.
 void D3D12HelloTriangle::OnRender()
 {
-    // Record all the commands we need to render the scene into the command list.
-    PopulateCommandList();
-
     // Execute the command list.
     ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
     m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
@@ -283,7 +282,7 @@ void D3D12HelloTriangle::OnRender()
     ThrowIfFailed(m_swapChain->Present(1, 0));
 	WaitForSingleObject(m_cpuWaitEvent, INFINITE);
 
-    WaitForPreviousFrame();
+    // WaitForPreviousFrame();
 }
 
 void D3D12HelloTriangle::OnDestroy()
@@ -313,7 +312,7 @@ void D3D12HelloTriangle::PopulateCommandList()
     m_commandList->RSSetScissorRects(1, &m_scissorRect);
 
     // Indicate that the back buffer will be used as a render target.
-    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+    // m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
     m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
@@ -326,7 +325,7 @@ void D3D12HelloTriangle::PopulateCommandList()
     m_commandList->DrawInstanced(3, 1, 0, 0);
 
     // Indicate that the back buffer will now be used to present.
-    m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+    // m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
     ThrowIfFailed(m_commandList->Close());
 }
