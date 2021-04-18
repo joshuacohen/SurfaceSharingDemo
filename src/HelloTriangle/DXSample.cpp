@@ -115,13 +115,6 @@ void DXSample::SetCustomWindowText(LPCWSTR text)
 _Use_decl_annotations_
 void DXSample::ParseCommandLineArgs(WCHAR* argv[], int argc)
 {
-    for (int i = 1; i < argc; ++i)
-    {
-        if (_wcsnicmp(argv[i], L"-warp", wcslen(argv[i])) == 0 || 
-            _wcsnicmp(argv[i], L"/warp", wcslen(argv[i])) == 0)
-        {
-            m_useWarpDevice = true;
-            m_title = m_title + L" (WARP)";
-        }
-    }
+	m_sharedRenderTargetGuid = argv[1];
+	m_sharedFenceGuid = argv[2];
 }

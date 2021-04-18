@@ -54,6 +54,9 @@ protected:
     // Adapter info.
     bool m_useWarpDevice;
 
+	std::wstring m_sharedRenderTargetGuid;
+	std::wstring m_sharedFenceGuid;
+
 private:
     // Root assets path.
     std::wstring m_assetsPath;

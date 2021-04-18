@@ -69,7 +69,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     PROCESS_INFORMATION pi {0};
 
     std::wstringstream cmdline;
-    cmdline << L"../../SharedSurface12/Debug/SharedSurface12.exe" //<< std::hex
+    cmdline << L"../../HelloTriangle/Debug/HelloTriangle.exe"
             << L' ' << app.GetSurface()
             << L' ' << app.GetFence();
 

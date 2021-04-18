@@ -12,6 +12,8 @@
 #include "stdafx.h"
 #include "Win32Application.h"
 
+#define WAIT_FOR_DEBUGGER while (!IsDebuggerPresent()) {} __debugbreak()
+
 HWND Win32Application::m_hwnd = nullptr;
 
 int Win32Application::Run(DXSample* pSample, HINSTANCE hInstance, int nCmdShow)
