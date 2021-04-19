@@ -2,6 +2,7 @@
 #include <d3d11_4.h>
 #include <windows.h>
 #include <wrl.h>
+#include <string>
 
 template<class T>
 using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -12,8 +13,11 @@ public:
 	bool Update();
 	void Shutdown();
 
-	const wchar_t* GetSurface() { return renderTargetGuidStr; }
-	const wchar_t* GetFence() { return fenceGuidStr; }
+	const std::wstring GetSurface() { return renderTargetGuidStr; }
+	const std::wstring GetDepthBuffer() { return depthBufferGuidStr; }
+	const std::wstring GetFence() { return sharedFenceGuidStr; }
+
+	static std::wstring MakeGuidStr();
 
 protected:
 	ComPtr<IDXGIFactory1> factory = nullptr;
@@ -22,12 +26,14 @@ protected:
 	ComPtr<ID3D11DeviceContext4> context = nullptr;
 	
 	ComPtr<ID3D11Texture2D> backBuffer = nullptr;	
-	ComPtr<ID3D11Texture2D> sharedSurface = nullptr;
+	ComPtr<ID3D11Texture2D> sharedRenderTarget = nullptr;
+	ComPtr<ID3D11Texture2D> sharedDepthBuffer = nullptr;
 	ComPtr<ID3D11RenderTargetView> rtv = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
-	wchar_t renderTargetGuidStr[39];
-	wchar_t fenceGuidStr[39];
+	std::wstring renderTargetGuidStr = MakeGuidStr();
+	std::wstring depthBufferGuidStr = MakeGuidStr();
+	std::wstring sharedFenceGuidStr = MakeGuidStr();
 
 	unsigned int monotonicCounter = 0;
 };

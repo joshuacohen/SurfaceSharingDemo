@@ -19,6 +19,16 @@ void SafeRelease(T **ppT) {
 	}
 }
 
+std::wstring D3D11App::MakeGuidStr() {
+	wchar_t guidStr[39] = L"";
+	GUID guid;
+
+	CoCreateGuid(&guid);
+	StringFromGUID2(guid, guidStr, 39);
+
+	return std::wstring(guidStr);
+}
+
 void D3D11App::Init(HWND hwnd) {
 	DXGI_SWAP_CHAIN_DESC scd = {
 		DXGI_MODE_DESC {
@@ -98,9 +108,9 @@ void D3D11App::Init(HWND hwnd) {
 	ThrowOnError(device0->QueryInterface<ID3D11Device5>(&device));
 	ThrowOnError(context0->QueryInterface<ID3D11DeviceContext4>(&context));
 	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-	ThrowOnError(device->CreateTexture2D(&sharedRenderTargetDesc, nullptr, &sharedSurface));
-	ThrowOnError(device->CreateRenderTargetView(sharedSurface.Get(), nullptr, &rtv));
-	ThrowOnError(sharedSurface->QueryInterface(IID_PPV_ARGS(&sharedResource)));
+	ThrowOnError(device->CreateTexture2D(&sharedRenderTargetDesc, nullptr, &sharedRenderTarget));
+	ThrowOnError(device->CreateRenderTargetView(sharedRenderTarget.Get(), nullptr, &rtv));
+	ThrowOnError(sharedRenderTarget->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
 	ThrowOnError(device->CreateFence(
 		0,
@@ -108,27 +118,20 @@ void D3D11App::Init(HWND hwnd) {
 		IID_PPV_ARGS(&sharedFence)
 	));
 
-	GUID surfaceGuid, fenceGuid;
-	HANDLE surfaceHandle, fenceHandle;
-
-	CoCreateGuid(&surfaceGuid);
-	CoCreateGuid(&fenceGuid);
-
-	StringFromGUID2(surfaceGuid, renderTargetGuidStr, sizeof(renderTargetGuidStr));
-	StringFromGUID2(fenceGuid, fenceGuidStr, sizeof(fenceGuidStr));
+	HANDLE tempHandle;
 
 	ThrowOnError(sharedResource->CreateSharedHandle(
 		nullptr, 
 		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		renderTargetGuidStr,
-		&surfaceHandle
+		renderTargetGuidStr.c_str(),
+		&tempHandle
 	));
 
 	ThrowOnError(sharedFence->CreateSharedHandle(
 		nullptr, 
 		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		fenceGuidStr,
-		&fenceHandle
+		sharedFenceGuidStr.c_str(),
+		&tempHandle
 	));
 }
 
