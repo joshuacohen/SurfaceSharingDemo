@@ -68,6 +68,21 @@ void D3D11App::Init(HWND hwnd) {
 		D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
 	};
 
+	D3D11_TEXTURE2D_DESC sharedDepthStencilDesc {
+		800,
+		600,
+		1,
+		1,
+		DXGI_FORMAT_B8G8R8A8_UNORM,
+		DXGI_SAMPLE_DESC {
+			1,
+			0
+		},
+		D3D11_USAGE_DEFAULT,
+		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET,
+		0,
+		D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
+	};
 	D3D_FEATURE_LEVEL features[] = {
 		D3D_FEATURE_LEVEL_9_1,
 		D3D_FEATURE_LEVEL_9_2,
@@ -109,6 +124,7 @@ void D3D11App::Init(HWND hwnd) {
 	ThrowOnError(context0->QueryInterface<ID3D11DeviceContext4>(&context));
 	ThrowOnError(swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
 	ThrowOnError(device->CreateTexture2D(&sharedRenderTargetDesc, nullptr, &sharedRenderTarget));
+	ThrowOnError(device->CreateTexture2D(&sharedDepthStencilDesc, nullptr, &sharedDepthBuffer));
 	ThrowOnError(device->CreateRenderTargetView(sharedRenderTarget.Get(), nullptr, &rtv));
 	ThrowOnError(sharedRenderTarget->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 
@@ -133,12 +149,19 @@ void D3D11App::Init(HWND hwnd) {
 		sharedFenceGuidStr.c_str(),
 		&tempHandle
 	));
+
+	ThrowOnError(sharedFence->CreateSharedHandle(
+		nullptr,
+		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
+		depthBufferGuidStr.c_str(),
+		&tempHandle
+	));
 }
 
 bool D3D11App::Update() {
 	ThrowOnError(context->Wait(sharedFence.Get(), ++monotonicCounter));
 
-	context->CopyResource(backBuffer.Get(), sharedSurface.Get());
+	context->CopyResource(backBuffer.Get(), sharedRenderTarget.Get());
 	ThrowOnError(swapChain->Present(0, 0)); //Flushes the queue?
 
 	ThrowOnError(context->Signal(sharedFence.Get(), ++monotonicCounter));
