@@ -136,6 +136,9 @@ void D3D12HelloTriangle::LoadPipeline()
 	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedFenceGuid.c_str(), GENERIC_ALL, &tempHandle));
 	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedFence)));
 
+    ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedDepthBufferGuid.c_str(), GENERIC_ALL, &tempHandle));
+    ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedDepthBuffer)));
+
     CD3DX12_RESOURCE_DESC depthBufferDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         DXGI_FORMAT_D24_UNORM_S8_UINT,
         800,
@@ -353,6 +356,8 @@ void D3D12HelloTriangle::PopulateCommandList()
     m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
     m_commandList->DrawInstanced(3, 1, 0, 0);
+
+    m_commandList->CopyResource(m_sharedDepthBuffer.Get(), m_depthBuffer.Get());
 
     // Indicate that the back buffer will now be used to present.
     // m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

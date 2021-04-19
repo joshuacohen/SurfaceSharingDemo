@@ -117,4 +117,5 @@ void DXSample::ParseCommandLineArgs(WCHAR* argv[], int argc)
 {
 	m_sharedRenderTargetGuid = argv[1];
 	m_sharedFenceGuid = argv[2];
+    m_sharedDepthBufferGuid = argv[3];
 }

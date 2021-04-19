@@ -55,6 +55,7 @@ protected:
     bool m_useWarpDevice;
 
 	std::wstring m_sharedRenderTargetGuid;
+    std::wstring m_sharedDepthBufferGuid;
 	std::wstring m_sharedFenceGuid;
 
 private:

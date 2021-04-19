@@ -28,6 +28,7 @@ protected:
 	ComPtr<ID3D11Texture2D> backBuffer = nullptr;	
 	ComPtr<ID3D11Texture2D> sharedRenderTarget = nullptr;
 	ComPtr<ID3D11Texture2D> sharedDepthBuffer = nullptr;
+	ComPtr<ID3D11Texture2D> ownedDepthBuffer = nullptr;
 	ComPtr<ID3D11RenderTargetView> rtv = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
