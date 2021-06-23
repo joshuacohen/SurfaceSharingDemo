@@ -128,7 +128,7 @@ void D3D12HelloTriangle::LoadPipeline()
         ThrowIfFailed(m_device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
     }
 
-	HANDLE tempHandle;
+	HANDLE tempHandle = nullptr;
 
 	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedRenderTargetGuid.c_str(), GENERIC_ALL, &tempHandle));
 	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedRenderTarget)));
