@@ -8,4 +8,4 @@ include_directories(HelloTriangle PRIVATE inc)
 target_link_libraries(HelloTriangle PRIVATE "dxgi.lib" "D3D12.lib" "D3DCompiler.lib")
 
 add_custom_target(CopyShaders ALL DEPENDS always_rebuild)
-add_custom_command(TARGET CopyShaders HelloTriangle POST_BUILD COMMAND robocopy ARGS /s "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}")
+add_custom_command(TARGET CopyShaders HelloTriangle POST_BUILD COMMAND "("robocopy ARGS /s "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR})" ^& IF %ERRORLEVEL% LSS 8 SET ERRORLEVEL = 0)
