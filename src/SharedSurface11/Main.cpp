@@ -71,8 +71,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     std::wstringstream cmdline;
     cmdline << L"../../HelloTriangle/Debug/HelloTriangle.exe"
             << L' ' << app.GetSurface()
+            << L' ' << app.GetDepthBuffer()
             << L' ' << app.GetFence()
-            << L' ' << app.GetDepthBuffer();
+			<< L' ' << GetCurrentProcessId();
 
     bool status = CreateProcess(
         nullptr,

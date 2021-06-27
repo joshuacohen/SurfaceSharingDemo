@@ -54,9 +54,10 @@ protected:
     // Adapter info.
     bool m_useWarpDevice;
 
-	std::wstring m_sharedRenderTargetGuid;
-    std::wstring m_sharedDepthBufferGuid;
-	std::wstring m_sharedFenceGuid;
+	HANDLE m_rtHandle = nullptr;
+	HANDLE m_dbHandle = nullptr;
+	HANDLE m_fenceHandle = nullptr;
+	DWORD m_parentProcessId = 0;
 
 private:
     // Root assets path.

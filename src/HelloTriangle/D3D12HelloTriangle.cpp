@@ -130,14 +130,20 @@ void D3D12HelloTriangle::LoadPipeline()
 
 	HANDLE tempHandle = nullptr;
 
-	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedRenderTargetGuid.c_str(), GENERIC_ALL, &tempHandle));
-	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedRenderTarget)));
+	ThrowIfFailed(m_device->OpenSharedHandle(m_rtHandle, IID_PPV_ARGS(&m_sharedRenderTarget)));
+	ThrowIfFailed(m_device->OpenSharedHandle(m_dbHandle, IID_PPV_ARGS(&m_sharedDepthBuffer)));
 
-	ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedFenceGuid.c_str(), GENERIC_ALL, &tempHandle));
+	DuplicateHandle(
+		OpenProcess(PROCESS_ALL_ACCESS, false, m_parentProcessId),
+		m_fenceHandle,
+		GetCurrentProcess(),
+		&tempHandle,
+		0,
+		false,
+		DUPLICATE_SAME_ACCESS
+	);
+	
 	ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedFence)));
-
-    ThrowIfFailed(m_device->OpenSharedHandleByName(m_sharedDepthBufferGuid.c_str(), GENERIC_ALL, &tempHandle));
-    ThrowIfFailed(m_device->OpenSharedHandle(tempHandle, IID_PPV_ARGS(&m_sharedDepthBuffer)));
 
     CD3DX12_RESOURCE_DESC depthBufferDesc = CD3DX12_RESOURCE_DESC::Tex2D(
         DXGI_FORMAT_D24_UNORM_S8_UINT,

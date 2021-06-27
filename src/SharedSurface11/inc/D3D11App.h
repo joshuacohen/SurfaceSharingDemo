@@ -13,11 +13,9 @@ public:
 	bool Update();
 	void Shutdown();
 
-	const std::wstring GetSurface() { return renderTargetGuidStr; }
-	const std::wstring GetDepthBuffer() { return depthBufferGuidStr; }
-	const std::wstring GetFence() { return sharedFenceGuidStr; }
-
-	static std::wstring MakeGuidStr();
+	const HANDLE GetSurface() { return rtHandle; }
+	const HANDLE GetDepthBuffer() { return dbHandle; }
+	const HANDLE GetFence() { return fenceHandle; }
 
 protected:
 	ComPtr<IDXGIFactory1> factory = nullptr;
@@ -32,9 +30,9 @@ protected:
 	ComPtr<ID3D11RenderTargetView> rtv = nullptr;
 	ComPtr<ID3D11Fence> sharedFence = nullptr;
 
-	std::wstring renderTargetGuidStr = MakeGuidStr();
-	std::wstring depthBufferGuidStr = MakeGuidStr();
-	std::wstring sharedFenceGuidStr = MakeGuidStr();
+	HANDLE rtHandle = nullptr;
+	HANDLE dbHandle = nullptr;
+	HANDLE fenceHandle = nullptr;
 
 	unsigned int monotonicCounter = 0;
 };

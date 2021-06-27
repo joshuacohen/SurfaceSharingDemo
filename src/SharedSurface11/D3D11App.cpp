@@ -19,16 +19,6 @@ void SafeRelease(T **ppT) {
 	}
 }
 
-std::wstring D3D11App::MakeGuidStr() {
-	wchar_t guidStr[39] = L"";
-	GUID guid;
-
-	CoCreateGuid(&guid);
-	StringFromGUID2(guid, guidStr, 39);
-
-	return std::wstring(guidStr);
-}
-
 void D3D11App::Init(HWND hwnd) {
 	DXGI_SWAP_CHAIN_DESC scd = {
 		DXGI_MODE_DESC {
@@ -65,7 +55,7 @@ void D3D11App::Init(HWND hwnd) {
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET,
 		0,
-		D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
+		D3D11_RESOURCE_MISC_SHARED
 	};
 
 	D3D11_TEXTURE2D_DESC sharedDepthStencilDesc {
@@ -81,7 +71,7 @@ void D3D11App::Init(HWND hwnd) {
 		D3D11_USAGE_DEFAULT,
 		D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET,
 		0,
-		D3D11_RESOURCE_MISC_SHARED | D3D11_RESOURCE_MISC_SHARED_NTHANDLE
+		D3D11_RESOURCE_MISC_SHARED
 	};
 
 	D3D11_TEXTURE2D_DESC ownedDepthStencilDesc {
@@ -151,30 +141,17 @@ void D3D11App::Init(HWND hwnd) {
 		IID_PPV_ARGS(&sharedFence)
 	));
 
-	HANDLE tempHandle;
-
-	ThrowOnError(sharedResource->CreateSharedHandle(
-		nullptr, 
-		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		renderTargetGuidStr.c_str(),
-		&tempHandle
-	));
+	ThrowOnError(sharedResource->GetSharedHandle(&rtHandle));
 
 	ThrowOnError(sharedFence->CreateSharedHandle(
 		nullptr, 
 		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		sharedFenceGuidStr.c_str(),
-		&tempHandle
+		L"",
+		&fenceHandle
 	));
 
 	ThrowOnError(sharedDepthBuffer->QueryInterface(IID_PPV_ARGS(&sharedResource)));
-
-	ThrowOnError(sharedResource->CreateSharedHandle(
-		nullptr,
-		DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE,
-		depthBufferGuidStr.c_str(),
-		&tempHandle
-	));
+	ThrowOnError(sharedResource->GetSharedHandle(&dbHandle));
 }
 
 bool D3D11App::Update() {

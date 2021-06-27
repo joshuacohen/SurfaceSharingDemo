@@ -11,6 +11,7 @@
 
 #include "stdafx.h"
 #include "DXSample.h"
+#include "string"
 
 using namespace Microsoft::WRL;
 
@@ -115,7 +116,8 @@ void DXSample::SetCustomWindowText(LPCWSTR text)
 _Use_decl_annotations_
 void DXSample::ParseCommandLineArgs(WCHAR* argv[], int argc)
 {
-	m_sharedRenderTargetGuid = argv[1];
-	m_sharedFenceGuid = argv[2];
-    m_sharedDepthBufferGuid = argv[3];
+	m_rtHandle = reinterpret_cast<HANDLE>(std::stoull(argv[1], nullptr, 16));
+	m_dbHandle = reinterpret_cast<HANDLE>(std::stoull(argv[2], nullptr, 16));
+	m_fenceHandle = reinterpret_cast<HANDLE>(std::stoull(argv[3], nullptr, 16));
+    m_parentProcessId = std::stoul(argv[3], nullptr, 10);
 }
