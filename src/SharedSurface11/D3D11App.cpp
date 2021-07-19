@@ -150,6 +150,9 @@ void D3D11App::Init(HWND hwnd) {
 		&fenceHandle
 	));
 
+	ThrowOnError(context->Signal(sharedFence.Get(), UINT_MAX));
+	ThrowOnError(context->Signal(sharedFence.Get(), 0));
+
 	ThrowOnError(sharedDepthBuffer->QueryInterface(IID_PPV_ARGS(&sharedResource)));
 	ThrowOnError(sharedResource->GetSharedHandle(&dbHandle));
 }
